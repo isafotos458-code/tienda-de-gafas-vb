@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finalizar Compra — Tienda de Gafas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body {
+    background-color: #fcfbfa;
+    color: #1c2b33;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .checkout-container {
+    max-width: 650px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+  .checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  .checkout-header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    margin: 0;
+  }
+  .back-link {
+    text-decoration: none;
+    color: #1c2b33;
+    font-weight: 500;
+  }
+  .checkout-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .checkout-card h2 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+  .order-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #444;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+  .payment-option {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .payment-option:hover {
+    border-color: #1c2b33;
+    background: #f9f9f9;
+  }
+  .payment-option input {
+    margin-top: 3px;
+    margin-right: 12px;
+    accent-color: #1c2b33;
+  }
+  .payment-details {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 4px;
+  }
+  .payment-section {
+    display: none;
+    background: #f8f9fa;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .payment-section.active {
+    display: block;
+  }
+  .pay-btn {
+    width: 100%;
+    background: #1c2b33;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .pay-btn:hover {
+    background: #2c424e;
+  }
+  #success-screen {
+    display: none;
+    text-align: center;
+    padding: 30px;
+  }
+  #success-screen h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #2e7d32;
+    font-size: 1.6rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>Finalizar Compra</h1>
+    <a href="index.html" class="back-link">← Volver a la tienda</a>
+  </div>
+
+  <form id="checkout-form" onsubmit="confirmarPagoFinal(event)">
+    <!-- 1. DATOS DE ENVÍO -->
+    <div class="checkout-card">
+      <h2>1. Tus datos de contacto y envío</h2>
+      <div class="form-group">
+        <label for="nombre">Nombre y Apellido</label>
+        <input type="text" id="nombre" required placeholder="Ej. Isabella Ubiña">
+      </div>
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" required placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label for="telefono">Teléfono / WhatsApp</label>
+        <input type="text" id="telefono" required placeholder="11 2345 6789">
+      </div>
+      <div class="form-group">
+        <label for="direccion">Dirección de entrega o retiro</label>
+        <input type="text" id="direccion" required placeholder="Calle, número, localidad">
+      </div>
+    </div>
+
+    <!-- 2. RESUMEN -->
+    <div class="checkout-card">
+      <h2>2. Resumen del pedido</h2>
+      <div id="checkout-items-list"></div>
+      <div class="order-total-row">
+        <span>Total a pagar</span>
+        <span id="checkout-total">$0</span>
+      </div>
+    </div>
+
+    <!-- 3. FORMAS DE PAGO Y SUS CAMPOS -->
+    <div class="checkout-card">
+      <h2>3. Método de Pago</h2>
+
+      <!-- Opción Mercado Pago -->
+      <label class="payment-option" onclick="cambiarMetodoPago('mercadopago')">
+        <input type="radio" name="payment_method" value="mercadopago" checked>
+        <div>
+          <strong>Mercado Pago</strong>
+          <div class="payment-details">Pagá con tarjeta, dinero en cuenta o medios de pago adheridos.</div>
+        </div>
+      </label>
+
+      <div id="section-mercadopago" class="payment-section active">
+        <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #333;">Ingresá el correo o usuario asociado a tu cuenta de Mercado Pago:</p>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>E-mail o Celular de Mercado Pago</label>
+          <input type="text" id="mp-user" placeholder="tucuenta@email.com / 11XXXXXXXX">
+        </div>
+      </div>
+
+      <!-- Opción Tarjeta de Crédito/Débito -->
+      <label class="payment-option" onclick="cambiarMetodoPago('tarjeta')">
+        <input type="radio" name="payment_method" value="tarjeta">
+        <div>
+          <strong>Tarjeta de Crédito / Débito</strong>
+          <div class="payment-details">Completá los datos de tu tarjeta directamente aquí.</div>
+        </div>
+      </label>
+
+      <div id="section-tarjeta" class="payment-section">
+        <div class="form-group">
+          <label>Número de Tarjeta</label>
+          <input type="text" id="card-number" placeholder="4532 0000 0000 0000">
+        </div>
+        <div class="form-group">
+          <label>Nombre del Titular</label>
+          <input type="text" id="card-holder" placeholder="Como figura en la tarjeta">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Vencimiento (MM/AA)</label>
+            <input type="text" id="card-expiry" placeholder="12/28">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>CVV / Cód. Seguridad</label>
+            <input type="text" id="card-cvv" placeholder="123">
+          </div>
+        </div>
+      </div>
+
+      <!-- Opción Transferencia Bancaria -->
+      <label class="payment-option" onclick="cambiarMetodoPago('transferencia')">
+        <input type="radio" name="payment_method" value="transferencia">
+        <div>
+          <strong>Transferencia Bancaria (10% OFF)</strong>
+          <div class="payment-details">Datos para transferir y cargar tu comprobante.</div>
+        </div>
+      </label>
+
+      <div id="section-transferencia" class="payment-section">
+        <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #1c2b33;">Datos de la cuenta:</p>
+        <p style="margin: 3px 0; font-size: 0.85rem;"><strong>Banco:</strong> Brubank</p>
+        <p style="margin: 3px 0; font-size: 0.85rem;"><strong>CBU:</strong> 0000003100012345678901</p>
+        <p style="margin: 3px 0; font-size: 0.85rem; margin-bottom: 12px;"><strong>Alias:</strong> TIENDA.DE.GAFAS.optica</p>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Número de Operación / Comprobante de Transferencia</label>
+          <input type="text" id="transf-comprobante" placeholder="Ej. TRF-98765432">
+        </div>
+      </div>
+
+      <button type="submit" class="pay-btn">Pagar y Finalizar Pedido</button>
+    </div>
+  </form>
+
+  <!-- PANTALLA DE ÉXITO FINAL -->
+  <div id="success-screen" class="checkout-card">
+    <h2>🎉 ¡Pago procesado con éxito!</h2>
+    <p id="success-message" style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 15px 0;"></p>
+    <a href="index.html" class="pay-btn" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box;">Volver al Inicio</a>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    cargarResumenCheckout();
+  });
+
+  function cargarResumenCheckout() {
+    const cart = JSON.parse(localStorage.getItem("optica_cart")) || [];
+    const container = document.getElementById("checkout-items-list");
+    const totalEl = document.getElementById("checkout-total");
+
+    if (cart.length === 0) {
+      container.innerHTML = "<p style='color: #666; font-size: 0.9rem;'>Tu carrito está vacío.</p>";
+      totalEl.textContent = "$0";
+      return;
+    }
+
+    let html = "";
+    let total = 0;
+
+    cart.forEach(item => {
+      const subtotal = item.precio * item.cantidad;
+      total += subtotal;
+      html += `
+        <div class="order-item-row">
+          <span>${item.nombre} (x${item.cantidad})</span>
+          <span>$${subtotal.toLocaleString("es-AR")}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+    totalEl.textContent = `$${total.toLocaleString("es-AR")}`;
+  }
+
+  function cambiarMetodoPago(metodo) {
+    document.getElementById("section-mercadopago").classList.remove("active");
+    document.getElementById("section-tarjeta").classList.remove("active");
+    document.getElementById("section-transferencia").classList.remove("active");
+
+    if (metodo === "mercadopago") {
+      document.getElementById("section-mercadopago").classList.add("active");
+    } else if (metodo === "tarjeta") {
+      document.getElementById("section-tarjeta").classList.add("active");
+    } else if (metodo === "transferencia") {
+      document.getElementById("section-transferencia").classList.add("active");
+    }
+  }
+
+  function confirmarPagoFinal(event) {
+    event.preventDefault();
+    const cart = JSON.parse(localStorage.getItem("optica_cart")) || [];
+    if (cart.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+
+    const nombre = document.getElementById("nombre").value;
+    const metodo = document.querySelector('input[name="payment_method"]:checked').value;
+    let detallePago = "";
+
+    if (metodo === "tarjeta") {
+      const numTarjeta = document.getElementById("card-number").value;
+      if (!numTarjeta) {
+        alert("Por favor ingresa los datos de tu tarjeta.");
+        return;
+      }
+      detallePago = `Tu pago con tarjeta terminada en <strong>${numTarjeta.slice(-4)}</strong> ha sido aprobado correctamente.`;
+    } else if (metodo === "transferencia") {
+      const comp = document.getElementById("transf-comprobante").value;
+      if (!comp) {
+        alert("Por favor ingresa el número de comprobante de la transferencia.");
+        return;
+      }
+      detallePago = `Recibimos los datos de tu transferencia (Comprobante: <strong>${comp}</strong>). El pedido ya está en preparación.`;
+    } else {
+      const mpUser = document.getElementById("mp-user").value;
+      detallePago = `El cobro a través de tu cuenta de Mercado Pago (<strong>${mpUser || 'cuenta asociada'}</strong>) se ha completado de forma segura.`;
+    }
+
+    const mensajeFinal = `¡Muchas gracias, <strong>${nombre}</strong>!<br><br>${detallePago}<br><br>Te enviaremos el comprobante y los detalles de seguimiento a tu correo. ¡Gracias por elegirnos!`;
+
+    document.getElementById("checkout-form").style.display = "none";
+    document.getElementById("success-message").innerHTML = mensajeFinal;
+    document.getElementById("success-screen").style.display = "block";
+
+    // Vaciamos el carrito tras pagar con éxito
+    localStorage.removeItem("optica_cart");
+  }
+</script>
+
+</body>
+</html>
